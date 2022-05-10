@@ -15,11 +15,6 @@ detector = htm.HandDetector(maxHands=1, detectionCon=0.6)
 
 wCam, hCam = 640, 480
 SPELL_WIN_WIDTH = 300
-cam_id = 0
-cam = cv.VideoCapture(cam_id)
-cam_inverted = False
-cam.set(3, wCam) #Set width of camera
-cam.set(4, hCam) #Set height of camera
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -46,6 +41,7 @@ font = pygame.font.Font('freesansbold.ttf', 40)
 def main():
 
     word = gen_word()
+    attempted_word = ""
 
     curr_word_count = 1
     max_word_count = 2
@@ -60,10 +56,22 @@ def main():
     curr_letter = ""
     alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m",
                 "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"]
-
     run = True
-    attempted_word = ""
-    finished_word_flag = False
+
+    config = configparser.ConfigParser()
+    config.read("config.properties")
+
+    cam_id = int(config["Camera"]["CamId"])
+    cam_inverted_str = config["Camera"]["CamInverted"]
+    cam_inverted = False
+    if cam_inverted_str == "True":
+        cam_inverted = True
+    max_word_count = int(config["Game"]["MaxWords"])
+
+    cam = cv.VideoCapture(cam_id)
+    cam.set(3, wCam) #Set width of camera
+    cam.set(4, hCam) #Set height of camera
+
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
