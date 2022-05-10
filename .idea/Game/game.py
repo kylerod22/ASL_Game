@@ -22,6 +22,8 @@ cam.set(4, hCam)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREEN = (50, 205, 50)
+RED = (255, 0, 0)
 
 WIN = pygame.display.set_mode((wCam + SPELL_WIN_WIDTH, hCam))
 pygame.display.set_caption("ASL GAME")
