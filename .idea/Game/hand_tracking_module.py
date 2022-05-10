@@ -50,7 +50,7 @@ class HandDetector:
         allHands = []
         h, w, c = img.shape
         if self.results.multi_hand_landmarks:
-            for handType, handLms, handWorldLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks, self.results.multi_hand_world_landmarks):
+            for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
                 myHand = {}
                 ## lmList
                 mylmList = []
