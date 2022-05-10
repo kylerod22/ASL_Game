@@ -49,7 +49,7 @@ def main():
     word = gen_word()
 
     curr_word_count = 1
-    max_word_count = 5
+    max_word_count = 2
     word_delay = 2
     total_letters = 0
     correct_letters = 0
@@ -96,6 +96,9 @@ def main():
                     #print(curr_letter, flush=True)
                     if len(attempted_word) < len(word):
                         attempted_word += curr_letter
+                        total_letters += 1
+                        if word[len(attempted_word) - 1] == curr_letter:
+                            correct_letters += 1
                         curr_letter = ""
                 last_letter = curr_letter
                 time_since_last_sample = curr_time
@@ -118,10 +121,20 @@ def main():
             word = gen_word()
             attempted_word = ""
             curr_word_count += 1
-
+        if curr_word_count > max_word_count:
+            print("Accuracy: " + str(correct_letters / total_letters * 100) + "%")
+            break
 
     pygame.quit()
 
+
+
+def count_correct_letters(target_word, attempted_word):
+    correct_letters = 0
+    for i, letter in enumerate(target_word):
+        if letter == attempted_word[i]:
+            correct_letters += 1
+    return correct_letters
 
 
 def display_target_word(target_word):
