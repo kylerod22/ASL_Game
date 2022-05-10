@@ -1,7 +1,6 @@
 import pygame
 import cv2 as cv
 import hand_tracking_module as htm
-from random_word import RandomWords
 import time
 import sys
 import numpy as np
