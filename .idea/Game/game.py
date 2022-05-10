@@ -6,7 +6,7 @@ import time
 import sys
 import numpy as np
 import random
-
+import configparser
 import tensorflow as tf
 keras = tf.keras
 model = tf.keras.models.load_model('model/asl.h5')
@@ -49,18 +49,57 @@ text_rect = text.get_rect()
 text_rect.center = (wCam + SPELL_WIN_WIDTH // 2, hCam // 2)
 
 def main():
+
+    curr_time = 0
+    prev_time = 0
+    time_since_last_sample = 0
+    sample_delay = 1.75
+    last_letter = ""
+    curr_letter = ""
+    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m",
+                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"]
+
     run = True
+    attempted_word = ""
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        WIN.fill(BLACK)
+        curr_time = time.time()
+        fps = 1 / (curr_time - prev_time)
+        prev_time = curr_time
+
         success, img = cam.read()
         hands, img = detector.findHands(img, draw=True)
+
+        if cam_inverted:
+            img = cv.flip(img, flipCode=1)
+
+        if hands:
+            if curr_time - time_since_last_sample >= sample_delay:
+
+                hand = hands[0]
+                curr_data = [hand["worldLmList"]]
+                prediction = model.predict(curr_data)
+                accuracy = int(max(prediction[0]) * 100)
+                curr_letter = alphabet[np.argmax(prediction)]
+
+                if curr_letter == last_letter:
+                    #print(curr_letter, flush=True)
+                    attempted_word += curr_letter
+                    curr_letter = ""
+                last_letter = curr_letter
+                time_since_last_sample = curr_time
+
+            cv.putText(img, alphabet[np.argmax(prediction)] + ": " + str(accuracy) + "%", (10, 430), cv.FONT_HERSHEY_PLAIN,
+                       2, (255, 0, 255), 2)
+
+        WIN.fill(BLACK)
         img = cvt_cv_image(img)
         WIN.blit(img, (0, 0))
-        WIN.blit(text, text_rect)
 
+        WIN.blit(text, text_rect)
+        display_attempt(word, text_rect, attempted_word, WIN)
 
 
         pygame.display.update()
