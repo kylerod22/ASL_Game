@@ -9,6 +9,7 @@ import numpy as np
 import tensorflow as tf
 keras = tf.keras
 model = tf.keras.models.load_model('model/asl.h5')
+detector = htm.HandDetector(maxHands=1, detectionCon=0.6)
 
 wCam, hCam = 640, 480
 SPELL_WIN_WIDTH = 300
@@ -33,11 +34,18 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        WIN.fill(WHITE)
+        WIN.fill(BLACK)
+        success, img = cam.read()
+        hands, img = detector.findHands(img, draw=True)
+        img = cvt_cv_image(img)
+        WIN.blit(img, (0, 0))
 
         pygame.display.update()
     pygame.quit()
 
+def cvt_cv_image(image):
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    return pygame.image.frombuffer(image.tobytes(), image.shape[1::-1], "RGB")
 
 if __name__ == "__main__":
     main()
