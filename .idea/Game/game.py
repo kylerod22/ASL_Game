@@ -60,8 +60,41 @@ def main():
         img = cvt_cv_image(img)
         WIN.blit(img, (0, 0))
         WIN.blit(text, text_rect)
+
+
+
         pygame.display.update()
     pygame.quit()
+
+def display_attempt(target_word, target_text_rect, attempted_word, WINDOW):
+    if attempted_word == "":
+        return
+    color = GREEN
+    if target_word[0] != attempted_word[0]:
+        color = RED
+    first_letter_render = font.render(attempted_word[0], color, color, BLACK)
+    first_letter_rect = first_letter_render.get_rect()
+    lastX = first_letter_rect.x = target_text_rect.x
+    lastY = first_letter_rect.y = target_text_rect.y + target_text_rect.height
+    WIN.blit(first_letter_render, first_letter_rect)
+    last_rect = first_letter_rect
+    for i, letter in enumerate(target_word):
+        if i == 0:
+            continue
+        if i >= len(attempted_word):
+            break
+
+        color = GREEN
+        if letter != attempted_word[i]:
+            color = RED
+        letter_render = font.render(attempted_word[i], True, color, BLACK)
+        letter_rect = letter_render.get_rect()
+        letter_rect.x = lastX + last_rect.width
+        letter_rect.y = lastY
+        WIN.blit(letter_render, letter_rect)
+        last_rect = letter_rect
+        lastX, lastY = letter_rect.x, letter_rect.y
+
 
 def cvt_cv_image(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
