@@ -8,6 +8,8 @@ import numpy as np
 import random
 import configparser
 import tensorflow as tf
+
+
 keras = tf.keras
 model = tf.keras.models.load_model('model/asl.h5')
 detector = htm.HandDetector(maxHands=1, detectionCon=0.6)
@@ -40,15 +42,22 @@ def gen_word():
         potential_word = random.choice(words)
     return potential_word
 
-word = gen_word()
-print(word)
-
 font = pygame.font.Font('freesansbold.ttf', 40)
-text = font.render(word, True, WHITE, BLACK)
-text_rect = text.get_rect()
-text_rect.center = (wCam + SPELL_WIN_WIDTH // 2, hCam // 2)
 
 def main():
+
+    word = gen_word()
+
+    curr_word_count = 1
+    max_word_count = 5
+    word_delay = 2
+    total_letters = 0
+    correct_letters = 0
+
+
+
+
+
 
     curr_time = 0
     prev_time = 0
@@ -61,13 +70,12 @@ def main():
 
     run = True
     attempted_word = ""
+    finished_word_flag = False
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         curr_time = time.time()
-        fps = 1 / (curr_time - prev_time)
-        prev_time = curr_time
 
         success, img = cam.read()
         hands, img = detector.findHands(img, draw=True)
@@ -86,8 +94,9 @@ def main():
 
                 if curr_letter == last_letter:
                     #print(curr_letter, flush=True)
-                    attempted_word += curr_letter
-                    curr_letter = ""
+                    if len(attempted_word) < len(word):
+                        attempted_word += curr_letter
+                        curr_letter = ""
                 last_letter = curr_letter
                 time_since_last_sample = curr_time
 
@@ -98,12 +107,30 @@ def main():
         img = cvt_cv_image(img)
         WIN.blit(img, (0, 0))
 
-        WIN.blit(text, text_rect)
-        display_attempt(word, text_rect, attempted_word, WIN)
-
+        target_word_rect = display_target_word(word)
+        display_attempt(word, target_word_rect, attempted_word, WIN)
 
         pygame.display.update()
+
+
+        if len(attempted_word) >= len(word):
+            time.sleep(word_delay)
+            word = gen_word()
+            attempted_word = ""
+            curr_word_count += 1
+
+
     pygame.quit()
+
+
+
+def display_target_word(target_word):
+    text = font.render(target_word, True, WHITE, BLACK)
+    text_rect = text.get_rect()
+    text_rect.center = (wCam + SPELL_WIN_WIDTH // 2, hCam // 2)
+
+    WIN.blit(text, text_rect)
+    return text_rect
 
 def display_attempt(target_word, target_text_rect, attempted_word, WINDOW):
     if attempted_word == "":
