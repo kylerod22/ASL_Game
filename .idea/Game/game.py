@@ -38,7 +38,7 @@ with open('words.txt') as f:
 
 def gen_word():
     potential_word = random.choice(words)
-    while "i" in potential_word or "z" in potential_word or len(potential_word) < 4 or len(potential_word) > 9:
+    while "j" in potential_word or "z" in potential_word or len(potential_word) < 4 or len(potential_word) > 9:
         potential_word = random.choice(words)
     return potential_word
 
@@ -54,13 +54,7 @@ def main():
     total_letters = 0
     correct_letters = 0
 
-
-
-
-
-
     curr_time = 0
-    prev_time = 0
     time_since_last_sample = 0
     sample_delay = 1.75
     last_letter = ""
@@ -75,6 +69,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
         curr_time = time.time()
 
         success, img = cam.read()
@@ -94,12 +89,13 @@ def main():
 
                 if curr_letter == last_letter:
                     #print(curr_letter, flush=True)
-                    if len(attempted_word) < len(word):
-                        attempted_word += curr_letter
-                        total_letters += 1
-                        if word[len(attempted_word) - 1] == curr_letter:
-                            correct_letters += 1
-                        curr_letter = ""
+                    if curr_word_count <= max_word_count:
+                        if len(attempted_word) < len(word):
+                            attempted_word += curr_letter
+                            total_letters += 1
+                            if word[len(attempted_word) - 1] == curr_letter:
+                                correct_letters += 1
+                            curr_letter = ""
                 last_letter = curr_letter
                 time_since_last_sample = curr_time
 
@@ -113,29 +109,24 @@ def main():
         target_word_rect = display_target_word(word)
         display_attempt(word, target_word_rect, attempted_word, WIN)
 
-        pygame.display.update()
+
 
 
         if len(attempted_word) >= len(word):
+            pygame.display.update()
             time.sleep(word_delay)
             word = gen_word()
             attempted_word = ""
             curr_word_count += 1
         if curr_word_count > max_word_count:
-            print("Accuracy: " + str(correct_letters / total_letters * 100) + "%")
-            break
+            WIN.fill(BLACK)
+            accuracy_text = font.render("Accuracy: " + '{0:.2f}'.format(correct_letters / total_letters * 100) + "%", True, WHITE, BLACK)
+            text_rect = accuracy_text.get_rect()
+            text_rect.center = ((wCam + SPELL_WIN_WIDTH) // 2, hCam // 2)
+            WIN.blit(accuracy_text, text_rect)
+        pygame.display.update()
 
     pygame.quit()
-
-
-
-def count_correct_letters(target_word, attempted_word):
-    correct_letters = 0
-    for i, letter in enumerate(target_word):
-        if letter == attempted_word[i]:
-            correct_letters += 1
-    return correct_letters
-
 
 def display_target_word(target_word):
     text = font.render(target_word, True, WHITE, BLACK)
@@ -178,8 +169,6 @@ def display_attempt(target_word, target_text_rect, attempted_word, WINDOW):
 def cvt_cv_image(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
     return pygame.image.frombuffer(image.tobytes(), image.shape[1::-1], "RGB")
-
-
 
 if __name__ == "__main__":
     main()
